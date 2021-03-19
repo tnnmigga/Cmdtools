@@ -120,33 +120,6 @@ var init = function () {
     for (let type of default_type_list) {
         code_statistic_data.type_list[type] = true;
     }
-
-    if (!Promise.allSettled) {
-        Promise.allSettled = function (promises) {
-            return new Promise(resolve => {
-                const data = [], len = promises.length;
-                let count = len;
-                for (let i = 0; i < len; i += 1) {
-                    const promise = promises[i];
-                    promise.then(res => {
-                        data[i] = {
-                            status: 'fulfilled',
-                            value: res
-                        };
-                    }, error => {
-                        data[i] = {
-                            status: 'rejected',
-                            reason: error
-                        };
-                    }).finally(() => { // promise has been settled
-                        if (!--count) {
-                            resolve(data);
-                        }
-                    });
-                }
-            });
-        }
-    }
 }
 
 var format_data = function (line_num, char_num) {
@@ -161,8 +134,8 @@ var print_line = function (data, fill_char) {
     const maxLength = config.maxLength;
     data = data || '';
     fill_char = fill_char || ' ';
-    if (data.length > maxLength) {
-        data = data.slice(maxLength - data.length + 10);
+    if (data.length > maxLength - 1) {
+        data = '...' + data.slice(data.length - maxLength + 5);
     }
     console.log(data.padEnd(maxLength, fill_char) + '/');
 }
@@ -228,7 +201,7 @@ var main = function () {
         print_line('pwd: ' + pwd);
         empty_line();
 
-        print_line(`stats file number: ${code_statistic_data.success_list.length}`)
+        print_line(`statistic file number: ${code_statistic_data.success_list.length}`)
 
         print_line(format_data(code_statistic_data.total_line_num, code_statistic_data.total_char_num));
         empty_line();
@@ -248,7 +221,9 @@ var main = function () {
         if (code_statistic_data.option.log_fail_list) {
             print_line('stats fail list:');
             empty_line();
-            let list = code_statistic_data.fail_list;
+            let list = code_statistic_data.fail_list.sort((a, b) => {
+                return a.filename.length - b.filename.length
+            });
             for (let file of list) {
                 print_line(file.filename);
             }
@@ -258,7 +233,9 @@ var main = function () {
         if (code_statistic_data.option.log_ignore_list) {
             print_line('ignore list:');
             empty_line();
-            let list = code_statistic_data.ignore_list;
+            let list = code_statistic_data.ignore_list.sort((a, b) => {
+                return a.filename.length - b.filename.length
+            });
             for (let file of list) {
                 print_line(file.filename);
             }
