@@ -135,7 +135,7 @@ var print_line = function (data, fill_char) {
     data = data || '';
     fill_char = fill_char || ' ';
     if (data.length > maxLength - 1) {
-        data = '...' + data.slice(data.length - maxLength + 5);
+        data = '...' + data.slice(data.length - maxLength + 4);
     }
     console.log(data.padEnd(maxLength, fill_char) + '/');
 }
