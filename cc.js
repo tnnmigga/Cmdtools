@@ -64,7 +64,7 @@ var statistic_code = function (filename) {
             if (error) {
                 reject(error);
             }
-            resolve(data.toString());
+            else resolve(data.toString());
         })
     })
     .then(
@@ -131,6 +131,10 @@ var format_data = function (line_num, char_num) {
 }
 
 var print_line = function (data, fill_char) {
+    if (code_statistic_data.option.no_omit) {
+        console.log(data);
+        return;
+    }
     const maxLength = config.maxLength;
     data = data || '';
     fill_char = fill_char || ' ';
@@ -141,7 +145,11 @@ var print_line = function (data, fill_char) {
 }
 
 var empty_line = function () {
-    return print_line('', '-');
+    if (code_statistic_data.option.no_omit) {
+        console.log(''.padEnd(config.maxLength, '-'));
+        return;
+    }
+    else print_line('', '-');
 }
 
 var main = function () {
@@ -174,6 +182,10 @@ var main = function () {
         }
         else if (argv[index] == '-il') {
             code_statistic_data.option.log_ignore_list = true;
+            index++;
+        }
+        else if (argv[index] == '-a' || argv[index] == '--all') {
+            code_statistic_data.option.no_omit = true;
             index++;
         }
         else remain.push(argv[index++]);
@@ -225,7 +237,11 @@ var main = function () {
                 return a.filename.length - b.filename.length
             });
             for (let file of list) {
-                print_line(file.filename);
+                let info = '';
+                if (code_statistic_data.option.no_omit) {
+                    info = ':\n' + file.error;
+                }
+                print_line(file.filename + info);
             }
             if (list.length == 0) print_line('empty !!!');
             empty_line();
